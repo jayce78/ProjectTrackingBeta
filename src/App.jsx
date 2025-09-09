@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import TaskSection from "./components/TaskSection";
 import ProjectInfo from "./components/ProjectInfo";
 import Metrics from "./components/Metrics";
+import ProjectsOverview from "./components/ProjectsOverview";
 
 import { saveData, loadData } from "./utils/storage";
 import { TEMPLATES } from "./utils/templates";
@@ -11,9 +12,10 @@ import { v4 as uuidv4 } from "uuid";
 import { useTheme } from "./hooks/useTheme";
 import { calculateMetrics } from "./utils/metrics";
 import { filterTasks, getAllTags } from "./utils/filterTasks";
-import ProjectsOverview from "./components/ProjectsOverview";
+import { colorForId } from "./utils/colors";
 
 export default function App() {
+  // ---------- State ----------
   const [projects, setProjects] = useState(loadData());
   const [selectedId, setSelectedId] = useState(projects[0]?.id ?? null);
 
@@ -35,10 +37,24 @@ export default function App() {
   const taskSectionRef = useRef(null);
   const newTaskInputRef = useRef(null);
 
+  // ---------- Persistence ----------
   useEffect(() => {
     saveData(projects);
   }, [projects]);
 
+  // Backfill colors for existing projects that don't have one (migration)
+  useEffect(() => {
+    const needsColor = projects.some((p) => !p.color);
+    if (needsColor) {
+      setProjects((prev) =>
+        prev.map((p) => (p.color ? p : { ...p, color: colorForId(p.id) }))
+      );
+    }
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ---------- Derived ----------
   const selected = useMemo(
     () => projects.find((p) => p.id === selectedId) || null,
     [projects, selectedId]
@@ -52,14 +68,14 @@ export default function App() {
     }
   }, [justCreated, selected]);
 
-  // live tick for running timers
+  // Live tick to refresh any running timers
   const [, setTick] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setTick((x) => x + 1), 1000);
     return () => clearInterval(id);
   }, []);
 
-  // Metrics & series
+  // Metrics & series for selected project
   const metrics = useMemo(() => calculateMetrics(selected), [selected]);
 
   const completionTrend = useMemo(() => {
@@ -68,6 +84,7 @@ export default function App() {
       .filter((t) => t.completedAt)
       .map((t) => ({ date: t.completedAt }))
       .sort((a, b) => new Date(a.date) - new Date(b.date));
+
     const points = [];
     let cum = 0;
     for (const e of events) {
@@ -91,7 +108,7 @@ export default function App() {
     [selected, statusFilter, tagFilter, searchQuery]
   );
 
-  // Project & task actions
+  // ---------- Actions: Projects ----------
   const addProject = (name) => {
     const template = TEMPLATES.find((t) => t.id === newProjectTemplate) || TEMPLATES[0];
     const defaultTasks = (template.tasks || []).map((title) => ({
@@ -106,7 +123,16 @@ export default function App() {
       dueAt: null,
       tags: [],
     }));
-    const p = { id: uuidv4(), name, createdAt: new Date().toISOString(), tasks: defaultTasks };
+
+    const id = uuidv4();
+    const p = {
+      id,
+      name,
+      createdAt: new Date().toISOString(),
+      tasks: defaultTasks,
+      color: colorForId(id), // assign consistent color
+    };
+
     setProjects((prev) => [p, ...prev]);
     setSelectedId(p.id);
     setJustCreated(true);
@@ -117,9 +143,11 @@ export default function App() {
     if (selectedId === id) setSelectedId(null);
   };
 
+  // ---------- Actions: Tasks ----------
   const addTask = (title, description) => {
     if (!selected) return;
     const tags = newTaskTags.split(",").map((s) => s.trim()).filter(Boolean);
+
     const t = {
       id: uuidv4(),
       title,
@@ -132,6 +160,7 @@ export default function App() {
       dueAt: newTaskDueLocal ? new Date(newTaskDueLocal).toISOString() : null,
       tags,
     };
+
     setProjects((prev) =>
       prev.map((p) => (p.id === selected.id ? { ...p, tasks: [t, ...p.tasks] } : p))
     );
@@ -189,17 +218,19 @@ export default function App() {
     });
   };
 
+  // NEW: reopen/unmark complete
   const reopenTask = (taskId) => {
     const task = selected?.tasks.find((x) => x.id === taskId);
     if (!task) return;
     updateTask(taskId, {
       status: "todo",
-      completedAt: null,      // remove completion timestamp
-      activeStart: null,      // ensure it's not running
-      // keep elapsedMs as-is so previously tracked time is preserved
+      completedAt: null,
+      activeStart: null,
+      // Keep elapsedMs so prior time isn't lost
     });
   };
 
+  // ---------- Render ----------
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-zinc-900 dark:text-zinc-100">
       <Header
@@ -209,6 +240,7 @@ export default function App() {
         theme={theme}
         setTheme={setTheme}
       />
+
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 lg:grid-cols-12">
         <Sidebar
           projects={projects}
@@ -223,7 +255,7 @@ export default function App() {
         />
 
         <section className="lg:col-span-8 xl:col-span-9 space-y-6">
-          {/* NEW: Overview of all projects */}
+          {/* Overview of all projects with clickable bars */}
           <ProjectsOverview
             projects={projects}
             onSelect={(id) => setSelectedId(id)}
@@ -262,7 +294,7 @@ export default function App() {
                 completeTask={completeTask}
                 removeTask={removeTask}
                 updateTask={updateTask}
-                reopenTask={reopenTask}
+                reopenTask={reopenTask}   // <-- pass down
                 taskSectionRef={taskSectionRef}
                 newTaskInputRef={newTaskInputRef}
               />

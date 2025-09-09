@@ -1,4 +1,5 @@
 import React, { useMemo, memo } from "react";
+import { colorForId } from "../utils/colors";
 import {
   ResponsiveContainer,
   BarChart,
@@ -19,16 +20,12 @@ function ProjectsOverview({ projects, onSelect }) {
         id: p.id,
         name: p.name.length > 20 ? p.name.slice(0, 17) + "…" : p.name,
         percent: pctComplete(p),
+        color: p.color ?? colorForId(p.id),
       })),
     [projects]
   );
 
-  // Define some simple colors
-  const colors = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"];
-
-  if (!projects.length) {
-    return null;
-  }
+  if (!projects.length) return null;
 
   return (
     <div className="rounded-2xl border bg-white dark:bg-zinc-900 dark:border-zinc-800">
@@ -38,7 +35,6 @@ function ProjectsOverview({ projects, onSelect }) {
           <BarChart
             data={data}
             margin={{ top: 10, right: 16, left: 8, bottom: 24 }}
-            isAnimationActive={false} // prevent re-animation on parent re-render
             onClick={(e) => {
               if (e && e.activePayload && e.activePayload[0]) {
                 const { id } = e.activePayload[0].payload;
@@ -47,28 +43,17 @@ function ProjectsOverview({ projects, onSelect }) {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="name"
-              interval={0}
-              angle={-20}
-              dy={18}
-              tickMargin={8}
-            />
+            <XAxis dataKey="name" interval={0} angle={-20} dy={18} tickMargin={8} />
             <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
             <Tooltip
               formatter={(v) => [`${v}%`, "% complete"]}
               labelFormatter={(label) => `Project: ${label}`}
             />
             <Bar dataKey="percent" radius={[6, 6, 0, 0]} isAnimationActive={false}>
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+              {data.map((entry) => (
+                <Cell key={entry.id} fill={entry.color} />
               ))}
-              <LabelList
-                dataKey="percent"
-                position="top"
-                formatter={(v) => `${v}%`}
-                isAnimationActive={false}
-              />
+              <LabelList dataKey="percent" position="top" formatter={(v) => `${v}%`} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -80,5 +65,4 @@ function ProjectsOverview({ projects, onSelect }) {
   );
 }
 
-// memoize to avoid rerender unless props change
 export default memo(ProjectsOverview);
