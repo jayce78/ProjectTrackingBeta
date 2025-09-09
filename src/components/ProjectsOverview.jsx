@@ -8,6 +8,7 @@ import {
   Tooltip,
   CartesianGrid,
   LabelList,
+  Cell,
 } from "recharts";
 import { pctComplete } from "../utils/time";
 
@@ -22,6 +23,9 @@ export default function ProjectsOverview({ projects, onSelect }) {
     [projects]
   );
 
+  // Define some simple colors (can expand later)
+  const colors = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"];
+
   if (!projects.length) {
     return null;
   }
@@ -35,7 +39,6 @@ export default function ProjectsOverview({ projects, onSelect }) {
             data={data}
             margin={{ top: 10, right: 16, left: 8, bottom: 24 }}
             onClick={(e) => {
-              // Click a bar to select that project
               if (e && e.activePayload && e.activePayload[0]) {
                 const { id } = e.activePayload[0].payload;
                 onSelect?.(id);
@@ -56,6 +59,9 @@ export default function ProjectsOverview({ projects, onSelect }) {
               labelFormatter={(label) => `Project: ${label}`}
             />
             <Bar dataKey="percent" radius={[6, 6, 0, 0]}>
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+              ))}
               <LabelList dataKey="percent" position="top" formatter={(v) => `${v}%`} />
             </Bar>
           </BarChart>
