@@ -2,19 +2,53 @@ import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { format, parseISO } from "date-fns";
 import {
-  Plus, Clock, Play, Pause, CheckCircle2, Trash2, Calendar, BarChart2, Search, Tag as TagIcon,
+  Plus,
+  Clock,
+  Play,
+  Pause,
+  CheckCircle2,
+  Trash2,
+  Calendar,
+  BarChart2,
+  Search,
+  Tag as TagIcon,
+  RotateCcw, // <— added for Reopen icon
 } from "lucide-react";
 import { formatDuration, durationFromTask, cls } from "../utils/time";
 
 export default function TaskSection({
-  selected, filteredTasks, allTags, statusFilter, setStatusFilter, searchQuery, setSearchQuery,
-  tagFilter, setTagFilter, newTaskTitle, setNewTaskTitle, newTaskDesc, setNewTaskDesc,
-  newTaskDueLocal, setNewTaskDueLocal, newTaskTags, setNewTaskTags,
-  addTask, startTask, pauseTask, completeTask, removeTask, updateTask,
-  taskSectionRef, newTaskInputRef,
+  selected,
+  filteredTasks,
+  allTags,
+  statusFilter,
+  setStatusFilter,
+  searchQuery,
+  setSearchQuery,
+  tagFilter,
+  setTagFilter,
+  newTaskTitle,
+  setNewTaskTitle,
+  newTaskDesc,
+  setNewTaskDesc,
+  newTaskDueLocal,
+  setNewTaskDueLocal,
+  newTaskTags,
+  setNewTaskTags,
+  addTask,
+  startTask,
+  pauseTask,
+  completeTask,
+  removeTask,
+  updateTask,
+  reopenTask,            // <— accept the prop
+  taskSectionRef,
+  newTaskInputRef,
 }) {
   return (
-    <div ref={taskSectionRef} className="rounded-2xl border bg-white dark:bg-zinc-900 dark:border-zinc-800">
+    <div
+      ref={taskSectionRef}
+      className="rounded-2xl border bg-white dark:bg-zinc-900 dark:border-zinc-800"
+    >
       <div className="p-4 font-medium">Tasks — {selected.name}</div>
 
       <div className="px-4 pb-2">
@@ -25,7 +59,9 @@ export default function TaskSection({
                 key={s}
                 className={cls(
                   "rounded-full px-3 py-1 text-xs border dark:border-zinc-700",
-                  statusFilter === s ? "bg-indigo-600 text-white" : "hover:bg-gray-50 dark:hover:bg-zinc-800"
+                  statusFilter === s
+                    ? "bg-indigo-600 text-white"
+                    : "hover:bg-gray-50 dark:hover:bg-zinc-800"
                 )}
                 onClick={() => setStatusFilter(s)}
               >
@@ -49,7 +85,9 @@ export default function TaskSection({
             <button
               className={cls(
                 "rounded-full px-2 py-0.5 text-xs border dark:border-zinc-700",
-                !tagFilter ? "bg-indigo-600 text-white" : "hover:bg-gray-50 dark:hover:bg-zinc-800"
+                !tagFilter
+                  ? "bg-indigo-600 text-white"
+                  : "hover:bg-gray-50 dark:hover:bg-zinc-800"
               )}
               onClick={() => setTagFilter(null)}
             >
@@ -60,7 +98,9 @@ export default function TaskSection({
                 key={tag}
                 className={cls(
                   "rounded-full px-2 py-0.5 text-xs border dark:border-zinc-700",
-                  tagFilter === tag ? "bg-indigo-600 text-white" : "hover:bg-gray-50 dark:hover:bg-zinc-800"
+                  tagFilter === tag
+                    ? "bg-indigo-600 text-white"
+                    : "hover:bg-gray-50 dark:hover:bg-zinc-800"
                 )}
                 onClick={() => setTagFilter(tag)}
               >
@@ -123,11 +163,16 @@ export default function TaskSection({
 
           <div className="space-y-2">
             {filteredTasks.length === 0 && (
-              <p className="text-sm text-gray-500 dark:text-zinc-400">No tasks match.</p>
+              <p className="text-sm text-gray-500 dark:text-zinc-400">
+                No tasks match.
+              </p>
             )}
             <AnimatePresence>
               {filteredTasks.map((t) => {
-                const overdue = t.dueAt && t.status !== "done" && new Date(t.dueAt) < new Date();
+                const overdue =
+                  t.dueAt &&
+                  t.status !== "done" &&
+                  new Date(t.dueAt) < new Date();
                 return (
                   <motion.div
                     key={t.id}
@@ -150,32 +195,41 @@ export default function TaskSection({
 
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-zinc-400">
                           <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 dark:bg-zinc-800">
-                            <Clock className="h-3 w-3" /> Created {format(parseISO(t.createdAt), "PP p")}
+                            <Clock className="h-3 w-3" /> Created{" "}
+                            {format(parseISO(t.createdAt), "PP p")}
                           </span>
 
                           {t.activeStart && t.status === "in_progress" && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-blue-700 dark:bg-blue-950 dark:text-blue-200">
-                              <Play className="h-3 w-3" /> Running {formatDuration(durationFromTask(t))}
+                              <Play className="h-3 w-3" /> Running{" "}
+                              {formatDuration(durationFromTask(t))}
                             </span>
                           )}
 
                           {t.completedAt && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-green-700 dark:bg-green-950 dark:text-green-200">
-                              <CheckCircle2 className="h-3 w-3" /> Done {format(parseISO(t.completedAt), "PP p")}
+                              <CheckCircle2 className="h-3 w-3" /> Done{" "}
+                              {format(parseISO(t.completedAt), "PP p")}
                             </span>
                           )}
 
                           {t.status === "done" && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-purple-700 dark:bg-purple-950 dark:text-purple-200">
-                              <BarChart2 className="h-3 w-3" /> Duration {formatDuration(durationFromTask(t))}
+                              <BarChart2 className="h-3 w-3" /> Duration{" "}
+                              {formatDuration(durationFromTask(t))}
                             </span>
                           )}
 
-                          {(Array.isArray(t.tags) ? t.tags : (t.tags || "").split(","))
+                          {(Array.isArray(t.tags)
+                            ? t.tags
+                            : (t.tags || "").split(","))
                             .map((x) => String(x).trim())
                             .filter(Boolean)
                             .map((tag) => (
-                              <span key={t.id + tag} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 dark:bg-zinc-800">
+                              <span
+                                key={t.id + tag}
+                                className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 dark:bg-zinc-800"
+                              >
                                 <TagIcon className="h-3 w-3" /> {tag}
                               </span>
                             ))}
@@ -185,8 +239,18 @@ export default function TaskSection({
                             <input
                               type="datetime-local"
                               className="bg-transparent outline-none"
-                              value={t.dueAt ? new Date(t.dueAt).toISOString().slice(0, 16) : ""}
-                              onChange={(e) => updateTask(t.id, { dueAt: e.target.value ? new Date(e.target.value).toISOString() : null })}
+                              value={
+                                t.dueAt
+                                  ? new Date(t.dueAt).toISOString().slice(0, 16)
+                                  : ""
+                              }
+                              onChange={(e) =>
+                                updateTask(t.id, {
+                                  dueAt: e.target.value
+                                    ? new Date(e.target.value).toISOString()
+                                    : null,
+                                })
+                              }
                             />
                           </span>
 
@@ -200,27 +264,68 @@ export default function TaskSection({
 
                       <div className="flex flex-wrap items-center gap-2">
                         {t.status !== "in_progress" && t.status !== "done" && (
-                          <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700" onClick={() => startTask(t.id)}>
-                            <span className="inline-flex items-center gap-1"><Play className="h-4 w-4" /> Start</span>
+                          <button
+                            className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+                            onClick={() => startTask(t.id)}
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              <Play className="h-4 w-4" /> Start
+                            </span>
                           </button>
                         )}
+
                         {t.status === "in_progress" && (
                           <>
-                            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700" onClick={() => pauseTask(t.id)}>
-                              <span className="inline-flex items-center gap-1"><Pause className="h-4 w-4" /> Pause</span>
+                            <button
+                              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+                              onClick={() => pauseTask(t.id)}
+                            >
+                              <span className="inline-flex items-center gap-1">
+                                <Pause className="h-4 w-4" /> Pause
+                              </span>
                             </button>
-                            <button className="rounded-lg bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700" onClick={() => completeTask(t.id)}>
-                              <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-4 w-4" /> Complete</span>
+                            <button
+                              className="rounded-lg bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700"
+                              onClick={() => completeTask(t.id)}
+                            >
+                              <span className="inline-flex items-center gap-1">
+                                <CheckCircle2 className="h-4 w-4" /> Complete
+                              </span>
                             </button>
                           </>
                         )}
+
                         {t.status !== "done" && t.status !== "in_progress" && (
-                          <button className="rounded-lg bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700" onClick={() => completeTask(t.id)}>
-                            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-4 w-4" /> Mark Done</span>
+                          <button
+                            className="rounded-lg bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700"
+                            onClick={() => completeTask(t.id)}
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              <CheckCircle2 className="h-4 w-4" /> Mark Done
+                            </span>
                           </button>
                         )}
-                        <button className="rounded-lg bg-red-50 px-3 py-1.5 text-sm text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30" onClick={() => removeTask(t.id)}>
-                          <span className="inline-flex items-center gap-1"><Trash2 className="h-4 w-4" /> Delete</span>
+
+                        {/* NEW: Reopen for completed tasks */}
+                        {t.status === "done" && (
+                          <button
+                            className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+                            onClick={() => reopenTask(t.id)}
+                            title="Move back to To-Do"
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              <RotateCcw className="h-4 w-4" /> Reopen
+                            </span>
+                          </button>
+                        )}
+
+                        <button
+                          className="rounded-lg bg-red-50 px-3 py-1.5 text-sm text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30"
+                          onClick={() => removeTask(t.id)}
+                        >
+                          <span className="inline-flex items-center gap-1">
+                            <Trash2 className="h-4 w-4" /> Delete
+                          </span>
                         </button>
                       </div>
                     </div>

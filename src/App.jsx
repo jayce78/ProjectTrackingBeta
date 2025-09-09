@@ -189,6 +189,17 @@ export default function App() {
     });
   };
 
+  const reopenTask = (taskId) => {
+    const task = selected?.tasks.find((x) => x.id === taskId);
+    if (!task) return;
+    updateTask(taskId, {
+      status: "todo",
+      completedAt: null,      // remove completion timestamp
+      activeStart: null,      // ensure it's not running
+      // keep elapsedMs as-is so previously tracked time is preserved
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-zinc-900 dark:text-zinc-100">
       <Header
@@ -251,6 +262,7 @@ export default function App() {
                 completeTask={completeTask}
                 removeTask={removeTask}
                 updateTask={updateTask}
+                reopenTask={reopenTask}
                 taskSectionRef={taskSectionRef}
                 newTaskInputRef={newTaskInputRef}
               />
