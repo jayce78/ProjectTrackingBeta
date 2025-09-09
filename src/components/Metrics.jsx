@@ -30,11 +30,11 @@ export default function Metrics({ metrics, durationSeries, completionTrend }) {
         <div className="h-64 p-4">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={durationSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--grid-stroke)" />
-              <XAxis ... stroke="var(--axis-text)" />
-              <YAxis ... stroke="var(--axis-text)" />
-              <Bar dataKey="ms" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
-
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" hide={durationSeries.length > 8} interval={0} angle={-30} dy={10} />
+              <YAxis tickFormatter={(v) => `${Math.round(v / 60000)}m`} />
+              <Tooltip formatter={(v) => formatDuration(v)} />
+              <Bar dataKey="ms" fill="#6366f1" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -44,11 +44,11 @@ export default function Metrics({ metrics, durationSeries, completionTrend }) {
         <div className="h-64 p-4">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={completionTrend}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--grid-stroke)" />
-              <XAxis ... stroke="var(--axis-text)" />
-              <YAxis ... stroke="var(--axis-text)" />
-              <Line type="monotone" dataKey="done" dot={false} stroke="var(--chart-2)" strokeWidth={2} />
-
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" tickFormatter={(d) => format(parseISO(d), "MM-dd")} />
+              <YAxis allowDecimals={false} />
+              <Tooltip labelFormatter={(d) => format(parseISO(String(d)), "PP p")} />
+              <Line type="monotone" dataKey="done" dot={false} stroke="#6366f1" />
             </LineChart>
           </ResponsiveContainer>
         </div>

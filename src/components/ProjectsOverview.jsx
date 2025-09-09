@@ -8,7 +8,6 @@ import {
   Tooltip,
   CartesianGrid,
   LabelList,
-  Cell,
 } from "recharts";
 import { pctComplete } from "../utils/time";
 
@@ -32,34 +31,34 @@ export default function ProjectsOverview({ projects, onSelect }) {
       <div className="p-4 font-medium">Projects Overview — % Complete</div>
       <div className="h-72 px-4 pb-4">
         <ResponsiveContainer width="100%" height="100%">
-            const palette = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"];
-
-            <BarChart
+          <BarChart
             data={data}
             margin={{ top: 10, right: 16, left: 8, bottom: 24 }}
             onClick={(e) => {
-                if (e?.activePayload?.[0]) onSelect?.(e.activePayload[0].payload.id);
+              // Click a bar to select that project
+              if (e && e.activePayload && e.activePayload[0]) {
+                const { id } = e.activePayload[0].payload;
+                onSelect?.(id);
+              }
             }}
-            >
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--grid-stroke)" />
+          >
+            <CartesianGrid strokeDasharray="3 3" />
             <XAxis
-                dataKey="name"
-                interval={0}
-                angle={-20}
-                dy={18}
-                tickMargin={8}
-                stroke="var(--axis-text)"
+              dataKey="name"
+              interval={0}
+              angle={-20}
+              dy={18}
+              tickMargin={8}
             />
-            <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} stroke="var(--axis-text)" />
-            <Tooltip formatter={(v) => [`${v}%`, "% complete"]} labelFormatter={(label) => `Project: ${label}`} />
+            <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+            <Tooltip
+              formatter={(v) => [`${v}%`, "% complete"]}
+              labelFormatter={(label) => `Project: ${label}`}
+            />
             <Bar dataKey="percent" radius={[6, 6, 0, 0]}>
-                {data.map((_, i) => (
-                <Cell key={i} fill={palette[i % palette.length]} />
-                ))}
-                <LabelList dataKey="percent" position="top" formatter={(v) => `${v}%`} />
+              <LabelList dataKey="percent" position="top" formatter={(v) => `${v}%`} />
             </Bar>
-            </BarChart>
-
+          </BarChart>
         </ResponsiveContainer>
         <p className="mt-2 text-xs px-1 text-zinc-500 dark:text-zinc-400">
           Tip: tap/click a bar to jump to that project.

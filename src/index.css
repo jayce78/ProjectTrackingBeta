@@ -7,26 +7,3 @@
 body {
   @apply bg-gray-50 text-gray-900 dark:bg-zinc-900 dark:text-zinc-100;
 }
-
-/* Chart palette */
-:root {
-  --chart-1: #6366f1; /* indigo-500 */
-  --chart-2: #22c55e; /* emerald-500 */
-  --chart-3: #f59e0b; /* amber-500 */
-  --chart-4: #ef4444; /* red-500 */
-  --chart-5: #06b6d4; /* cyan-500 */
-
-  --grid-stroke: #e5e7eb;   /* gray-200 */
-  --axis-text:  #6b7280;    /* gray-500 */
-}
-
-.dark {
-  --chart-1: #818cf8; /* indigo-400 */
-  --chart-2: #34d399; /* emerald-400 */
-  --chart-3: #fbbf24; /* amber-400 */
-  --chart-4: #f87171; /* red-400 */
-  --chart-5: #22d3ee; /* cyan-400 */
-
-  --grid-stroke: #3f3f46;  /* zinc-700 */
-  --axis-text:  #a1a1aa;   /* zinc-400 */
-}
