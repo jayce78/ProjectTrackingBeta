@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, memo } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { pctComplete } from "../utils/time";
 
-export default function ProjectsOverview({ projects, onSelect }) {
+function ProjectsOverview({ projects, onSelect }) {
   const data = useMemo(
     () =>
       projects.map((p) => ({
@@ -23,7 +23,7 @@ export default function ProjectsOverview({ projects, onSelect }) {
     [projects]
   );
 
-  // Define some simple colors (can expand later)
+  // Define some simple colors
   const colors = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"];
 
   if (!projects.length) {
@@ -38,6 +38,7 @@ export default function ProjectsOverview({ projects, onSelect }) {
           <BarChart
             data={data}
             margin={{ top: 10, right: 16, left: 8, bottom: 24 }}
+            isAnimationActive={false} // prevent re-animation on parent re-render
             onClick={(e) => {
               if (e && e.activePayload && e.activePayload[0]) {
                 const { id } = e.activePayload[0].payload;
@@ -58,11 +59,16 @@ export default function ProjectsOverview({ projects, onSelect }) {
               formatter={(v) => [`${v}%`, "% complete"]}
               labelFormatter={(label) => `Project: ${label}`}
             />
-            <Bar dataKey="percent" radius={[6, 6, 0, 0]}>
+            <Bar dataKey="percent" radius={[6, 6, 0, 0]} isAnimationActive={false}>
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
               ))}
-              <LabelList dataKey="percent" position="top" formatter={(v) => `${v}%`} />
+              <LabelList
+                dataKey="percent"
+                position="top"
+                formatter={(v) => `${v}%`}
+                isAnimationActive={false}
+              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -73,3 +79,6 @@ export default function ProjectsOverview({ projects, onSelect }) {
     </div>
   );
 }
+
+// memoize to avoid rerender unless props change
+export default memo(ProjectsOverview);

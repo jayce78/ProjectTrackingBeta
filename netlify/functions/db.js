@@ -38,7 +38,7 @@ export async function handler(event) {
     await ensureMigrations();
 
     // Simple router by method/path
-    const { httpMethod, queryStringParameters, body, path } = event;
+    const { httpMethod, queryStringParameters, body } = event;
 
     // GET /.netlify/functions/db?route=projects
     if (httpMethod === "GET" && queryStringParameters?.route === "projects") {
