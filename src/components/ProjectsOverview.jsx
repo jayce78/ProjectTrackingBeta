@@ -1,5 +1,4 @@
 import React, { useMemo, memo } from "react";
-import { colorForId } from "../utils/colors";
 import {
   ResponsiveContainer,
   BarChart,
@@ -12,6 +11,7 @@ import {
   Cell,
 } from "recharts";
 import { pctComplete } from "../utils/time";
+import { colorForId } from "../utils/colors";
 
 function ProjectsOverview({ projects, onSelect }) {
   const data = useMemo(
@@ -20,7 +20,6 @@ function ProjectsOverview({ projects, onSelect }) {
         id: p.id,
         name: p.name.length > 20 ? p.name.slice(0, 17) + "…" : p.name,
         percent: pctComplete(p),
-        color: p.color ?? colorForId(p.id),
       })),
     [projects]
   );
@@ -35,11 +34,10 @@ function ProjectsOverview({ projects, onSelect }) {
           <BarChart
             data={data}
             margin={{ top: 10, right: 16, left: 8, bottom: 24 }}
+            isAnimationActive={false}
             onClick={(e) => {
-              if (e && e.activePayload && e.activePayload[0]) {
-                const { id } = e.activePayload[0].payload;
-                onSelect?.(id);
-              }
+              const payload = e?.activePayload?.[0]?.payload;
+              if (payload?.id) onSelect?.(payload.id);
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
@@ -49,9 +47,9 @@ function ProjectsOverview({ projects, onSelect }) {
               formatter={(v) => [`${v}%`, "% complete"]}
               labelFormatter={(label) => `Project: ${label}`}
             />
-            <Bar dataKey="percent" radius={[6, 6, 0, 0]} isAnimationActive={false}>
-              {data.map((entry) => (
-                <Cell key={entry.id} fill={entry.color} />
+            <Bar dataKey="percent" radius={[6, 6, 0, 0]}>
+              {data.map((d) => (
+                <Cell key={d.id} fill={colorForId(d.id)} />
               ))}
               <LabelList dataKey="percent" position="top" formatter={(v) => `${v}%`} />
             </Bar>
