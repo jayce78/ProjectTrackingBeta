@@ -1,19 +1,32 @@
-// A small, nice palette
-export const PROJECT_COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#eab308"];
+// src/utils/colors.js
+export const PROJECT_COLORS = [
+  "#3b82f6", // blue-500
+  "#22c55e", // green-500
+  "#f59e0b", // amber-500
+  "#ef4444", // red-500
+  "#8b5cf6", // violet-500
+  "#06b6d4", // cyan-500
+  "#eab308", // yellow-500
+  "#ec4899", // pink-500
+  "#10b981", // emerald-500
+  "#a855f7", // purple-500
+];
 
-// Simple stable hash → palette index
+// Stable color per id
 export function colorForId(id) {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
-  const idx = Math.abs(h) % PROJECT_COLORS.length;
-  return PROJECT_COLORS[idx];
+  let hash = 0;
+  for (let i = 0; i < String(id).length; i++) {
+    hash = (hash * 31 + String(id).charCodeAt(i)) >>> 0;
+  }
+  return PROJECT_COLORS[hash % PROJECT_COLORS.length];
 }
 
-// Helpers for soft backgrounds/borders
-export function hexToRgba(hex, alpha = 1) {
-  const m = hex.replace("#", "");
-  const r = parseInt(m.slice(0, 2), 16);
-  const g = parseInt(m.slice(2, 4), 16);
-  const b = parseInt(m.slice(4, 6), 16);
+// Hex -> rgba for soft tints
+export function withOpacity(hex, alpha = 0.1) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!m) return hex;
+  const r = parseInt(m[1], 16);
+  const g = parseInt(m[2], 16);
+  const b = parseInt(m[3], 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
