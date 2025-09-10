@@ -1,33 +1,51 @@
-export function filterTasks(selected, statusFilter, tagFilter, searchQuery) {
-  if (!selected) return [];
-  let list = [...selected.tasks];
-  if (statusFilter !== "all") list = list.filter((t) => t.status === statusFilter);
-  if (tagFilter) {
-    list = list.filter((t) => {
-      const tags = Array.isArray(t.tags) ? t.tags : (t.tags || "").split(",").map((x) => x.trim());
-      return tags.includes(tagFilter);
-    });
+// Null-safe helpers
+const toArray = (v) => (Array.isArray(v) ? v : v ? [v] : []);
+const norm = (s) => (s == null ? "" : String(s)).toLowerCase();
+
+export function getAllTags(project) {
+  if (!project || !Array.isArray(project.tasks)) return [];
+  const set = new Set();
+  for (const t of project.tasks) {
+    for (const tag of toArray(t?.tags)) {
+      const v = String(tag).trim();
+      if (v) set.add(v);
+    }
   }
-  if (searchQuery.trim()) {
-    const q = searchQuery.toLowerCase();
-    list = list.filter((t) => {
-      const tags = Array.isArray(t.tags) ? t.tags : (t.tags || "").split(",").map((x) => x.trim());
-      return t.title.toLowerCase().includes(q) || (t.description || "").toLowerCase().includes(q) || tags.some((tag) => tag.toLowerCase().includes(q));
-    });
-  }
-  list.sort((a, b) => {
-    const ad = a.dueAt ? new Date(a.dueAt).getTime() : Infinity;
-    const bd = b.dueAt ? new Date(b.dueAt).getTime() : Infinity;
-    if (ad !== bd) return ad - bd;
-    const order = { in_progress: 0, todo: 1, done: 2 };
-    return (order[a.status] ?? 3) - (order[b.status] ?? 3);
-  });
-  return list;
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
 
-export function getAllTags(selected) {
-  if (!selected) return [];
-  return Array.from(new Set(selected.tasks.flatMap((t) =>
-    (Array.isArray(t.tags) ? t.tags : (t.tags || "").split(",")).map((s) => String(s).trim()).filter(Boolean)
-  ))).sort((a, b) => a.localeCompare(b));
+/**
+ * filterTasks(project, statusFilter, tagFilter, searchQuery)
+ * - statusFilter: "all" | "todo" | "in_progress" | "done"
+ * - tagFilter: "" (no filter) OR exact tag string
+ * - searchQuery: matched against title, description, and tags (case-insensitive, substring)
+ */
+export function filterTasks(project, statusFilter = "all", tagFilter = "", searchQuery = "") {
+  if (!project || !Array.isArray(project.tasks)) return [];
+  const wantStatus = statusFilter || "all";
+  const wantTag = norm(tagFilter);
+  const q = norm(searchQuery);
+
+  return project.tasks.filter((t) => {
+    // status
+    if (wantStatus !== "all" && t?.status !== wantStatus) return false;
+
+    // tag (exact match, case-insensitive)
+    if (wantTag) {
+      const has = toArray(t?.tags).some((tag) => norm(tag) === wantTag);
+      if (!has) return false;
+    }
+
+    // search in title / description / tags
+    if (q) {
+      const hayTitle = norm(t?.title);
+      const hayDesc = norm(t?.description);
+      const hayTags = toArray(t?.tags).map(norm).join(" ");
+      if (!hayTitle.includes(q) && !hayDesc.includes(q) && !hayTags.includes(q)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 }
