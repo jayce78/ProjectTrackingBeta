@@ -1,5 +1,5 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { format, parseISO } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { pctComplete } from "../utils/time";
