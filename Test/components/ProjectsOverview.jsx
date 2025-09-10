@@ -20,7 +20,6 @@ function ProjectsOverview({ projects, onSelect }) {
         id: p.id,
         name: p.name.length > 20 ? p.name.slice(0, 17) + "…" : p.name,
         percent: pctComplete(p),
-        color: p.color ?? colorForId(p.id), // <-- ensure each bar has a color
       })),
     [projects]
   );
@@ -48,17 +47,9 @@ function ProjectsOverview({ projects, onSelect }) {
               formatter={(v) => [`${v}%`, "% complete"]}
               labelFormatter={(label) => `Project: ${label}`}
             />
-            <Bar
-              dataKey="percent"
-              radius={[6, 6, 0, 0]}
-              isAnimationActive={false}
-              onClick={(data) => {
-                const id = data?.payload?.id;
-                if (id) onSelect?.(id);
-              }}
-            >
-              {data.map((entry) => (
-                <Cell key={entry.id} fill={entry.color} style={{ cursor: "pointer" }} />
+            <Bar dataKey="percent" radius={[6, 6, 0, 0]}>
+              {data.map((d) => (
+                <Cell key={d.id} fill={colorForId(d.id)} />
               ))}
               <LabelList dataKey="percent" position="top" formatter={(v) => `${v}%`} />
             </Bar>
